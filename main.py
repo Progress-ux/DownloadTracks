@@ -36,7 +36,7 @@ def progress_hook(d):
 def download_audio(url, out_dir="downloads"):
     os.makedirs(out_dir, exist_ok=True)
 
-    temp_template = f"{out_dir}/temp.%(ext)s"
+    
     temp_template = f"{out_dir}/temp.%(ext)s"
     node_path = r"C:\Program Files\nodejs" 
     os.environ["PATH"] += os.pathsep + node_path
