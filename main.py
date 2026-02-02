@@ -37,13 +37,23 @@ def download_audio(url, out_dir="downloads"):
     os.makedirs(out_dir, exist_ok=True)
 
     temp_template = f"{out_dir}/temp.%(ext)s"
+    temp_template = f"{out_dir}/temp.%(ext)s"
+    node_path = r"C:\Program Files\nodejs" 
+    os.environ["PATH"] += os.pathsep + node_path
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": temp_template,
         "progress_hooks": [progress_hook],
-        "quiet": True,
+        "quiet": False,
         "noprogress": True,
-        "cookiesfrombrowser": ("firefox",),
+        #"cookiesfrombrowser": ("firefox", r"C:\Users\user\AppData\Roaming\zen\Profiles\iv14k5xb.Default (release)"),
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["web", "android",],
+            }
+        },
+        "javascript_executor": "node",
+        "ffmpeg_location": r"C:\ffmpeg\bin\ffmpeg.exe",
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
