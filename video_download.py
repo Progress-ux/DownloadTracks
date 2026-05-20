@@ -1,29 +1,27 @@
-from tqdm import tqdm
 from typing import Any
 import os
 import re
-
-
+import yt_dlp
+from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, APIC, error # type: ignore
 class VideoDownloader:
    def __init__(self):
-      self.pbar = None
       self._safe_artist = "Unknown"
       self._safe_title = "Unknown"
+      self.qt_log_signal = None
+      self.qt_signal = None
    
    def get_safe_artist(self) -> str: return self._safe_artist
    def get_safe_title(self) -> str: return self._safe_title
 
    def progress_hook(self, d):
-      if d['status'] == 'downloading':
-         if self.pbar is None:
-            total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
-            self.pbar = tqdm(total=total, unit='B', unit_scale=True, desc='Downloading')
-         self.pbar.update(d['downloaded_bytes'] - self.pbar.n)
-      elif d['status'] == 'finished':
-         if self.pbar:
-            self.pbar.close()
-            self.pbar = None
-            print("✅ Загрузка завершена")
+      if d['status'] == 'downloading' and self.qt_signal is not None:
+         downloaded = d.get('downloaded_bytes', 0)
+         total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
+
+         if total > 0:
+            percent = int((downloaded / total) * 100)
+            self.qt_signal.emit(percent)
    
    def download_track(
       self,
@@ -31,13 +29,13 @@ class VideoDownloader:
       yt_dlp_config: dict[str, Any], 
       number: int,
       outtmpl: str = "temp.%(ext)s",
+      qt_signal=None,
+      qt_log_signal=None
    ):
-      try:
-         import yt_dlp
-      except ImportError:
-         raise Exception("Модуль yt_dlp не найден. Установка: pip install yt-dlp")
-      
-      print(f"\n{number}. Скачиваю: {url}")
+      self.qt_signal = qt_signal
+      self.qt_log_signal = qt_log_signal
+
+      self.qt_log_signal.emit(f"\n{number}. Скачиваю: {url}") # type: ignore
 
       local_yt_dlp: dict[str, Any] = yt_dlp_config.copy()
 
@@ -48,7 +46,6 @@ class VideoDownloader:
          info = ydl.extract_info(url, download=True)
       
       if not info:
-         print(f"❌ Не удалось получить информацию о треке: {url}")
          raise Exception("Не удалось получить информацию о треке")
       
       return info
@@ -73,19 +70,13 @@ class VideoDownloader:
 
          if os.path.exists(temp_file_path):
             os.replace(temp_file_path, final_file_path)
-            print(f"Трек сохранен как: {filename}")
+            self.qt_log_signal.emit(f"Аудио сохранено как: {filename}") # type: ignore
          else: 
             raise FileNotFoundError(f"Временный файл {temp_file_path} не найден")
       except Exception as e:
-         print(f"Ошибка при переименовании файла: {e}")
          raise Exception("Не удалось сохранить трек")
       
    def add_tags(self, track_path: str):
-      try:
-         from mutagen.easyid3 import EasyID3
-      except ImportError:
-         raise Exception("Модуль mutagen не найден. Установка: pip install mutagen")
-
       try:
          tags = EasyID3(track_path)
       except Exception as e:
@@ -96,11 +87,6 @@ class VideoDownloader:
       tags.save(track_path)
       
    def add_thumbnail(self, track_path: str, thumbnail_url: str):
-      try:
-         from mutagen.id3 import ID3, APIC, error # type: ignore
-      except ImportError:
-         raise Exception("Модуль mutagen не найден. Установка: pip install mutagen")
-
       try:
          tags = ID3(track_path)
       except error:
