@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QTextEdit
+from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 from download_window import DownloadWindow
 from settings_window import SettingsWindow
 
