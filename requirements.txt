@@ -1,4 +1,4 @@
 yt-dlp
 requests
 mutagen
-tqdm
+pyside6
