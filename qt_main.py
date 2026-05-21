@@ -1,6 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QTextEdit
 from download_window import DownloadWindow
+from settings_window import SettingsWindow
 
 class MainWindow(QMainWindow):
    def __init__(self):
@@ -8,11 +9,13 @@ class MainWindow(QMainWindow):
       self.setWindowTitle("YouTube MP3 Downloader")
       self.setGeometry(100, 100, 800, 600)
       
-      download_window = DownloadWindow()
+      self.download_window = DownloadWindow()
+      self.settings_window = SettingsWindow()
+
       self.tabs = QTabWidget()
 
-      self.tabs.addTab(download_window.container, "Скачивание")
-      self.tabs.addTab(QTextEdit("Настройки в разработке..."), "Настройки")
+      self.tabs.addTab(self.download_window, "Скачивание")
+      self.tabs.addTab(self.settings_window, "Настройки")
 
       self.setCentralWidget(self.tabs)
    
