@@ -32,10 +32,13 @@ class VideoDownloader:
       qt_signal=None,
       qt_log_signal=None
    ):
+      if os.path.exists(outtmpl):
+         os.remove(outtmpl)
+         
       self.qt_signal = qt_signal
       self.qt_log_signal = qt_log_signal
 
-      self.qt_log_signal.emit(f"\n{number}. Скачиваю: {url}") # type: ignore
+      self.qt_log_signal.emit(f"+ \n{number}. Скачиваю: {url}") # type: ignore
 
       local_yt_dlp: dict[str, Any] = yt_dlp_config.copy()
 
@@ -70,7 +73,7 @@ class VideoDownloader:
 
          if os.path.exists(temp_file_path):
             os.replace(temp_file_path, final_file_path)
-            self.qt_log_signal.emit(f"Аудио сохранено как: {filename}") # type: ignore
+            self.qt_log_signal.emit(f"+ Аудио сохранено как: {filename}") # type: ignore
          else: 
             raise FileNotFoundError(f"Временный файл {temp_file_path} не найден")
       except Exception as e:
