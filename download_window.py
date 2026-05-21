@@ -48,9 +48,14 @@ class DownloadWindow(QWidget):
 
       url_list = [url.strip() for url in urls.replace(",", " ").split() if url.strip()]
       self.download_thread = DownloadThread(url_list, self.config)
+      
       self.download_thread.progress.connect(self.update_progress)
+
       self.download_thread.finished.connect(self.download_finished)
+
       self.download_thread.log_message.connect(self.log_message.append)
+      self.log_message.ensureCursorVisible()
+
       self.download_thread.start()
 
    def update_progress(self, value):
