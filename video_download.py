@@ -6,6 +6,7 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC, error # type: ignore
 class VideoDownloader:
    def __init__(self):
+
       self._safe_artist = "Unknown"
       self._safe_title = "Unknown"
       self.qt_log_signal = None
@@ -34,11 +35,11 @@ class VideoDownloader:
    ):
       if os.path.exists(outtmpl):
          os.remove(outtmpl)
-         
+
       self.qt_signal = qt_signal
       self.qt_log_signal = qt_log_signal
 
-      self.qt_log_signal.emit(f"+ \n{number}. Скачиваю: {url}") # type: ignore
+      self.qt_log_signal.emit(f"\n+ {number}. Скачиваю: {url}") # type: ignore
 
       local_yt_dlp: dict[str, Any] = yt_dlp_config.copy()
 
