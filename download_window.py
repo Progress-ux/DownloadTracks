@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QProgressBar, QTabWidget, QTextEdit, QVBoxLayout, QPushButton, QWidget
+from PySide6.QtWidgets import QProgressBar, QTextEdit, QVBoxLayout, QPushButton, QWidget
 from download_thread import DownloadThread
 from config import Config
 import os
@@ -6,11 +6,8 @@ import os
 class DownloadWindow(QWidget):
    def __init__(self):
       super().__init__()
-      self.setWindowTitle("Скачивание треков")
 
       # UI Elements
-      self.tabs = QTabWidget()
-
       self.url_input = QTextEdit()
       self.url_input.setPlaceholderText("Вставьте ссылки на YouTube (через пробел, запятую или построчно).")
 
@@ -29,9 +26,7 @@ class DownloadWindow(QWidget):
       layout.addWidget(self.progress_bar)
       layout.addWidget(self.log_message)
 
-      self.container = QWidget()
-
-      self.container.setLayout(layout)
+      self.setLayout(layout)
       self.btn_download.clicked.connect(self.start_download)
 
       self.config = Config()
@@ -48,7 +43,7 @@ class DownloadWindow(QWidget):
 
       url_list = [url.strip() for url in urls.replace(",", " ").split() if url.strip()]
       self.download_thread = DownloadThread(url_list, self.config)
-      
+
       self.download_thread.progress.connect(self.update_progress)
 
       self.download_thread.finished.connect(self.download_finished)
