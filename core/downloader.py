@@ -7,15 +7,17 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC, error # type: ignore
 
 class VideoDownloader:
-   def __init__(self, qt_signal_progress=None, qt_signal_log=None):
+   def __init__(self, progress_callback=None, log_callback=None):
 
       self._safe_artist = "Unknown"
       self._safe_title = "Unknown"
-      self.progress_callback = qt_signal_progress
-      self.log_callback = qt_signal_log
+      self._extension = ".mp3"
+      self.progress_callback = progress_callback
+      self.log_callback = log_callback
    
    def get_safe_artist(self) -> str: return self._safe_artist
    def get_safe_title(self) -> str: return self._safe_title
+   def get_extension(self) -> str: return self._extension
 
    def progress_hook(self, d):
       if d['status'] == 'downloading' and self.progress_callback :
@@ -65,6 +67,7 @@ class VideoDownloader:
          raise FileNotFoundError(f"Скачанный файл не найден по пути: {actual_temp_path}")
 
       extension = os.path.splitext(actual_temp_path)[1]
+      self._extension = extension
 
       self._safe_artist = re.sub(r'[<>:"/\\|?*]', "", str(artist))
       self._safe_title = re.sub(r'[<>:"/\\|?*]', "", str(title))
