@@ -1,3 +1,24 @@
 {
-   "output": "downloads"
+   "output": "downloads",
+   "yt-dlp-config": {
+      "format": "bestaudio/best",
+      "outtmpl": "%(title)s.%(ext)s",
+      "quiet": true,
+      "noprogress": true,
+      "extractor_args": {
+         "youtube": {
+            "player_client": [
+               "web",
+               "android"
+            ]
+         }
+      },
+      "postprocessors": [
+         {
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192"
+         }
+      ]
+   }
 }
