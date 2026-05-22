@@ -49,6 +49,7 @@ class DownloadThread(QThread):
 
          except FileExistsError as e:
             self.log_message.emit(f"- Пропуск: {e}")
+            continue
          
          except Exception as e:
             self.log_message.emit(f"- Ошибка при загрузке {url}: {e}")
