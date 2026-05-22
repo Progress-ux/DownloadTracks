@@ -55,25 +55,35 @@ class VideoDownloader:
       artist = info.get("uploader", "Unknown")
       title = info.get("title", "Unknown")
 
+      if 'requested_downloads' in info and info['requested_downloads']:
+        actual_temp_path = info['requested_downloads'][0].get('filepath')
+      else:
+         # Фолбэк, если по какой-то причине списка нет (хотя он должен быть)
+         actual_temp_path = info.get('_filename')
+
+      if not actual_temp_path or not os.path.exists(actual_temp_path):
+         raise FileNotFoundError(f"Скачанный файл не найден по пути: {actual_temp_path}")
+
+      extension = os.path.splitext(actual_temp_path)[1]
+
       self._safe_artist = re.sub(r'[<>:"/\\|?*]', "", str(artist))
       self._safe_title = re.sub(r'[<>:"/\\|?*]', "", str(title))
 
-      filename = f"{self._safe_artist} - {self._safe_title}.mp3"
+      filename = f"{self._safe_artist} - {self._safe_title}{extension}"
 
-      temp_file_path = os.path.join(output_folder, "temp.mp3")
       final_file_path = os.path.join(output_folder, filename)
 
       if os.path.exists(final_file_path):
-         if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+         if os.path.exists(actual_temp_path):
+            os.remove(actual_temp_path)
          raise FileExistsError(f"Файл {filename} уже существует")
 
       try:
-         if os.path.exists(temp_file_path):
-            os.replace(temp_file_path, final_file_path)
+         if os.path.exists(actual_temp_path):
+            os.replace(actual_temp_path, final_file_path)
             self.log_callback(f"+ Аудио сохранено как: {filename}") # type: ignore
          else: 
-            raise FileNotFoundError(f"Временный файл {temp_file_path} не найден")
+            raise FileNotFoundError(f"Временный файл {actual_temp_path} не найден")
       except FileNotFoundError as e:
          raise Exception(e)
       except Exception as e:
