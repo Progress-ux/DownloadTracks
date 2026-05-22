@@ -63,19 +63,21 @@ class VideoDownloader:
       temp_file_path = os.path.join(output_folder, "temp.mp3")
       final_file_path = os.path.join(output_folder, filename)
 
-      try:
-         if os.path.exists(final_file_path):
-            if os.path.exists(temp_file_path):
-               os.remove(temp_file_path)
-            raise FileExistsError(f"Файл {filename} уже существует")
+      if os.path.exists(final_file_path):
+         if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+         raise FileExistsError(f"Файл {filename} уже существует")
 
+      try:
          if os.path.exists(temp_file_path):
             os.replace(temp_file_path, final_file_path)
             self.log_callback(f"+ Аудио сохранено как: {filename}") # type: ignore
          else: 
             raise FileNotFoundError(f"Временный файл {temp_file_path} не найден")
+      except FileNotFoundError as e:
+         raise Exception(e)
       except Exception as e:
-         raise Exception("Не удалось сохранить трек")
+         raise Exception(f"Критическая ошибка при сохранении трека: {e}")
       
    def add_tags(self, track_path: str):
       try:
