@@ -22,7 +22,7 @@ class DownloadThread(QThread):
             # Downloads the track to temp.mp3
             info = video_downloader.download_track(
                url.strip(), 
-               self.config.yt_dlp_config_data, 
+               self.config.config.get("yt-dlp-config", {}), 
                i,
                outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
                qt_signal=self.progress,
