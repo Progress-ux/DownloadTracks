@@ -2,6 +2,7 @@
    "output": "downloads",
    "yt-dlp-config": {
       "format": "bestaudio/best",
+      "noplaylist": true,
       "outtmpl": "%(title)s.%(ext)s",
       "quiet": true,
       "noprogress": true,
