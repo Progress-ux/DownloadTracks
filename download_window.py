@@ -4,7 +4,7 @@ from config import Config
 import os
 
 class DownloadWindow(QWidget):
-   def __init__(self):
+   def __init__(self, config):
       super().__init__()
 
       # UI Elements
@@ -29,7 +29,7 @@ class DownloadWindow(QWidget):
       self.setLayout(layout)
       self.btn_download.clicked.connect(self.start_download)
 
-      self.config = Config()
+      self.config = config
       self.create_output_folder(self.config.config.get("output", "downloads"))
 
    def create_output_folder(self, output_folder):
