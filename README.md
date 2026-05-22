@@ -31,6 +31,32 @@ pip install -r requirements.txt
 pip install -r requirements-cli.txt
 ```
 
+3. **Установка ffmpeg:**
+
+### Arch
+```bash
+sudo pacman -S ffmpeg
+```
+
+### Ubuntu/Debian:
+``` bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+### macOS:
+``` bash
+brew install ffmpeg
+```
+
+### Windows:
+* Скачайте FFmpeg с [официального сайта](https://ffmpeg.org/download.html)
+* Добавьте путь к FFmpeg в переменную окружения PATH, либо добавьте путь в `config.json`:
+  
+```json
+"ffmpeg_location": "путь/к/бинарнику/ffmpeg"
+```
+  
 ## Запуск
 ### Графический интерфейс (GUI)
 
