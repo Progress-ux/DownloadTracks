@@ -1,5 +1,5 @@
 import os
-from video_download import VideoDownloader
+from core.downloader import VideoDownloader
 from PySide6.QtCore import QThread, Signal
 
 class DownloadThread(QThread):
@@ -13,7 +13,7 @@ class DownloadThread(QThread):
       self.config = config
 
    def run(self):
-      video_downloader = VideoDownloader()
+      video_downloader = VideoDownloader(self.progress.emit, self.log_message.emit)
 
       for i, url in enumerate(self.urls, start=1):
          try:
@@ -25,8 +25,6 @@ class DownloadThread(QThread):
                self.config.config.get("yt-dlp-config", {}), 
                i,
                outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
-               qt_signal=self.progress,
-               qt_log_signal=self.log_message
             )
 
             # Renames and saves a track

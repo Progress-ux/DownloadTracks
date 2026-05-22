@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QProgressBar, QTextEdit, QVBoxLayout, QPushButton, QWidget
-from download_thread import DownloadThread
-from config import Config
+from ui.worker import DownloadThread
+from infrastructure.config_manager import Config
 import os
 
 class DownloadWindow(QWidget):

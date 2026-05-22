@@ -1,28 +1,30 @@
 from typing import Any
 import os
 import re
+import requests
 import yt_dlp
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC, error # type: ignore
+
 class VideoDownloader:
-   def __init__(self):
+   def __init__(self, qt_signal_progress=None, qt_signal_log=None):
 
       self._safe_artist = "Unknown"
       self._safe_title = "Unknown"
-      self.qt_log_signal = None
-      self.qt_signal = None
+      self.progress_callback = qt_signal_progress
+      self.log_callback = qt_signal_log
    
    def get_safe_artist(self) -> str: return self._safe_artist
    def get_safe_title(self) -> str: return self._safe_title
 
    def progress_hook(self, d):
-      if d['status'] == 'downloading' and self.qt_signal is not None:
+      if d['status'] == 'downloading' and self.progress_callback :
          downloaded = d.get('downloaded_bytes', 0)
          total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
 
          if total > 0:
             percent = int((downloaded / total) * 100)
-            self.qt_signal.emit(percent)
+            self.progress_callback(percent)
    
    def download_track(
       self,
@@ -30,16 +32,11 @@ class VideoDownloader:
       yt_dlp_config: dict[str, Any], 
       number: int,
       outtmpl: str = "temp.%(ext)s",
-      qt_signal=None,
-      qt_log_signal=None
    ):
       if os.path.exists(outtmpl):
          os.remove(outtmpl)
 
-      self.qt_signal = qt_signal
-      self.qt_log_signal = qt_log_signal
-
-      self.qt_log_signal.emit(f"\n+ {number}. Скачиваю: {url}") # type: ignore
+      self.log_callback(f"\n+ {number}. Скачиваю: {url}") # type: ignore
 
       local_yt_dlp: dict[str, Any] = yt_dlp_config.copy()
 
@@ -74,7 +71,7 @@ class VideoDownloader:
 
          if os.path.exists(temp_file_path):
             os.replace(temp_file_path, final_file_path)
-            self.qt_log_signal.emit(f"+ Аудио сохранено как: {filename}") # type: ignore
+            self.log_callback(f"+ Аудио сохранено как: {filename}") # type: ignore
          else: 
             raise FileNotFoundError(f"Временный файл {temp_file_path} не найден")
       except Exception as e:
@@ -97,7 +94,6 @@ class VideoDownloader:
          raise Exception("Ошибка при чтении ID3 тегов. Убедитесь, что файл существует и является MP3.")
       
       try:
-         import requests
          response = requests.get(thumbnail_url, timeout=5)
          response.raise_for_status()
          thumbnail_data = response.content

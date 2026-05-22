@@ -1,8 +1,7 @@
-import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
-from download_window import DownloadWindow
-from settings_window import SettingsWindow
-from config import Config
+from PySide6.QtWidgets import QMainWindow, QTabWidget
+from ui.download_page import DownloadWindow
+from ui.settings_page import SettingsWindow
+from infrastructure.config_manager import Config
 
 class MainWindow(QMainWindow):
    def __init__(self):
@@ -21,9 +20,3 @@ class MainWindow(QMainWindow):
       self.tabs.addTab(self.settings_window, "Настройки")
 
       self.setCentralWidget(self.tabs)
-   
-if __name__ == "__main__":
-   app = QApplication(sys.argv)
-   window = MainWindow()
-   window.show()
-   sys.exit(app.exec())
