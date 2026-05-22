@@ -1,10 +1,9 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, 
+from PySide6.QtWidgets import (QFileDialog, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, 
                              QLineEdit, QPushButton, QLabel, QFormLayout, QGroupBox)
 from PySide6.QtCore import Qt
-from config import Config
-
+import os
 class SettingsWindow(QWidget):
-   def __init__(self, config: Config):
+   def __init__(self, config):
       super().__init__()
       self.config = config
 
@@ -45,6 +44,7 @@ class SettingsWindow(QWidget):
 
       self.btn_output_folder = QPushButton("Обзор...")
       self.btn_output_folder.setFixedWidth(80)
+      self.btn_output_folder.clicked.connect(self.browse_folder)
 
       path_input_layout.addWidget(self.save_path)
       path_input_layout.addWidget(self.btn_output_folder)
@@ -67,6 +67,15 @@ class SettingsWindow(QWidget):
       main_layout.addStretch()
 
       self.setLayout(main_layout)
+
+   def browse_folder(self):
+      directory = QFileDialog.getExistingDirectory(
+         self, 
+         "Выберите папку для сохранения",
+         self.save_path.text() or os.getcwd()
+      )
+      if directory:
+         self.save_path.setText(directory)
 
    def save_settings(self):
       new_codec = self.choice_preferred_codec.currentText()
