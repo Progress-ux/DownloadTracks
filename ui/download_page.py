@@ -42,7 +42,8 @@ class DownloadWindow(QWidget):
          return
 
       url_list = [url.strip() for url in urls.replace(",", " ").split() if url.strip()]
-      self.download_thread = DownloadThread(url_list, self.config)
+      unique_list = list(dict.fromkeys(url_list))
+      self.download_thread = DownloadThread(unique_list, self.config)
 
       self.download_thread.progress.connect(self.update_progress)
 
