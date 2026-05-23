@@ -55,7 +55,7 @@ class VideoDownloader:
    
    def save_track(self, info, output_folder: str):
 
-      self.log_callback("Начинаю извлечение аудио") # type: ignore
+      self.log_callback("+ Начинаю извлечение аудио") # type: ignore
 
       artist = info.get("uploader", "Unknown")
       title = info.get("title", "Unknown")
@@ -97,7 +97,7 @@ class VideoDownloader:
       
    def add_tags(self, track_path: str):
 
-      self.log_callback("Начинаю добавление тегов") # type: ignore
+      self.log_callback("+ Начинаю добавление тегов") # type: ignore
 
       try:
          tags = EasyID3(track_path)
@@ -107,10 +107,10 @@ class VideoDownloader:
       tags["artist"] = self._safe_artist
       tags["title"] = self._safe_title
       tags.save(track_path)
-      self.log_callback("Теги успешно добавлены") # type: ignore
+      self.log_callback("+ Теги успешно добавлены") # type: ignore
       
    def add_thumbnail(self, track_path: str, thumbnail_url: str):
-      self.log_callback("Начинаю добавление обложки") # type: ignore
+      self.log_callback("+ Начинаю добавление обложки") # type: ignore
 
       try:
          tags = ID3(track_path)
@@ -134,7 +134,7 @@ class VideoDownloader:
          ))
 
          tags.save(track_path)
-         self.log_callback("Обложка успешно добавлена") # type: ignore
+         self.log_callback("+ Обложка успешно добавлена") # type: ignore
 
       except Exception as e:
          raise Exception(f"Не удалось добавить обложку в ID3 теги: {e}")
