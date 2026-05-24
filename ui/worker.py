@@ -19,7 +19,7 @@ class DownloadThread(QThread):
          try:
             output_dir = self.config.config.get("output", "downloads")
 
-            # Downloads the track to temp.mp3
+            # Downloads the track to temp.{ext}
             info = video_downloader.download_track(
                url.strip(), 
                self.config.config.get("yt-dlp-config", {}), 
