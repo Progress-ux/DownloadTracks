@@ -2,14 +2,16 @@ from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
 import re
 import os
+import logging
+import argparse
 
 class NoWarningLogger:
-    def debug(self, msg):
-        pass
-    def warning(self, msg):
-        pass
-    def error(self, msg):
-        print(msg)
+   def debug(self, msg):
+      pass
+   def warning(self, msg):
+      pass
+   def error(self, msg):
+      print(msg)
 
 def main_menu():
    print("\n=== YouTube Music Downloader (CLI) ===")
@@ -56,9 +58,30 @@ def draw_progress_bar(progress):
       print()  # Move to a new line after loading is complete
 
 def main():
+
+   parser = argparse.ArgumentParser()
+
+   parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+
+   args = parser.parse_args()
+   log_mode = logging.DEBUG
+
+   if not args.debug:
+      log_mode = logging.INFO
+
+   logging.basicConfig(
+      level=log_mode, 
+      filename="py_log.log", 
+      filemode="w",
+      format="%(asctime)s %(levelname)s %(message)s"
+   )
+
+   logging.debug("test debug")
+   logging.info("test info")
+
    config = Config()
 
-   config.config["yt-dlp-config"]["logger"] = NoWarningLogger()
+   config.config["yt-dlp-config"]["logger"] = logging
    
    output_dir = config.config.get("output", "downloads")
    create_output_folder(output_dir)
