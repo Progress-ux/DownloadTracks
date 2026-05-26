@@ -11,6 +11,7 @@ class NoWarningLogger:
    def warning(self, msg):
       pass
    def error(self, msg):
+      logging.error(msg)
       print(msg)
 
 def main_menu():
@@ -32,6 +33,7 @@ def enter_urls():
       urls.extend(re.split(r"[ ,]+", line.strip()))
 
    if not urls:
+      logging.error("Ссылки не введены")
       raise Exception("Ссылки не введены")
 
    unique_list = list(dict.fromkeys(urls))
@@ -72,16 +74,12 @@ def main():
    logging.basicConfig(
       level=log_mode, 
       filename="py_log.log", 
-      filemode="w",
-      format="%(asctime)s %(levelname)s %(message)s"
+      encoding="utf-8",
+      format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(message)s'
    )
 
-   logging.debug("test debug")
-   logging.info("test info")
-
    config = Config()
-
-   config.config["yt-dlp-config"]["logger"] = logging
+   config.config["yt-dlp-config"]["logger"] = NoWarningLogger()
    
    output_dir = config.config.get("output", "downloads")
    create_output_folder(output_dir)
@@ -116,12 +114,15 @@ def main():
                   downloader.add_tags(track_path)
                   downloader.add_thumbnail(track_path, str(info.get("thumbnail", "")))
 
+                  logging.info(f"Загрузка {filename} завершена")
                   print(f"+ Загрузка {filename} завершена")
 
                except FileExistsError as e:
                   print(f"- Пропуск: {e}")
+                  logging.warning(f"Пропуск: {e}")
                   continue
                except Exception as e:
+                  logging.error(f"Ошибка при загрузке {url}: {e}")
                   print(f"- Ошибка при загрузке {url}: {e}")
                   continue
 
