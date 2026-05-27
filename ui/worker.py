@@ -1,5 +1,7 @@
 import os
 from core.downloader import VideoDownloader
+from core.video_processor import VideoProcessor
+from core.yt_dlp_logger import NoWarningLogger
 from PySide6.QtCore import QThread, Signal
 
 class DownloadThread(QThread):
@@ -11,9 +13,13 @@ class DownloadThread(QThread):
       super().__init__()
       self.urls = urls
       self.config = config
+      self.config.config["yt-dlp-config"]["logger"] = NoWarningLogger(self.log_message.emit)
 
    def run(self):
       video_downloader = VideoDownloader(self.progress.emit, self.log_message.emit)
+      video_processor = VideoProcessor(
+         log_callback=self.log_message.emit
+      )
 
       for i, url in enumerate(self.urls, start=1):
          try:
@@ -28,19 +34,19 @@ class DownloadThread(QThread):
             )
 
             # Renames and saves a track
-            video_downloader.save_track(
+            video_processor.save_track(
                info, 
                output_dir
             )
 
-            filename = f"{video_downloader.get_safe_artist()} - {video_downloader.get_safe_title()}.mp3"
+            filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
             track_path = os.path.join(output_dir, filename)
 
             # Fills in tags
-            video_downloader.add_tags(track_path)
+            video_processor.add_tags(track_path)
 
             # Writes to the thumbnail track
-            video_downloader.add_thumbnail(
+            video_processor.add_thumbnail(
                track_path,
                str(info.get("thumbnail", ""))
             )
