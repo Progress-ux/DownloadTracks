@@ -35,7 +35,7 @@ class VideoProcessor():
       return actual_temp_path
       
 
-   def save_track(self, info, output_folder: str):
+   def save_track(self, info, output_folder: str) -> str:
 
       self.log_callback("+ Начинаю извлечение аудио") # type: ignore
       logging.info("Начинаю извлечение аудио")
@@ -81,6 +81,8 @@ class VideoProcessor():
       except Exception as e:
          logging.error(f"Критическая ошибка при сохранении трека: {e}")
          raise Exception(f"Критическая ошибка при сохранении трека: {e}")
+      
+      return final_file_path
       
    def add_tags(self, track_path: str):
 
