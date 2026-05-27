@@ -1,18 +1,11 @@
 from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
+from core.video_processor import VideoProcessor
+from core.yt_dlp_logger import NoWarningLogger
 import re
 import os
 import logging
 import argparse
-
-class NoWarningLogger:
-   def debug(self, msg):
-      pass
-   def warning(self, msg):
-      pass
-   def error(self, msg):
-      logging.error(msg)
-      print(msg)
 
 def main_menu():
    print("\n=== YouTube Music Downloader (CLI) ===")
@@ -79,7 +72,7 @@ def main():
    )
 
    config = Config()
-   config.config["yt-dlp-config"]["logger"] = NoWarningLogger()
+   config.config["yt-dlp-config"]["logger"] = NoWarningLogger(logging.error)
    
    output_dir = config.config.get("output", "downloads")
    create_output_folder(output_dir)
@@ -88,6 +81,10 @@ def main():
    downloader = VideoDownloader(
       log_callback=print,
       progress_callback=draw_progress_bar
+   )
+
+   video_processor = VideoProcessor(
+      log_callback=print
    )
 
    try:
@@ -106,13 +103,13 @@ def main():
                      outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
                   )
 
-                  downloader.save_track(info, output_dir)
+                  video_processor.save_track(info, output_dir)
 
-                  filename = f"{downloader.get_safe_artist()} - {downloader.get_safe_title()}{downloader.get_extension()}"
+                  filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
                   track_path = os.path.join(output_dir, filename)
 
-                  downloader.add_tags(track_path)
-                  downloader.add_thumbnail(track_path, str(info.get("thumbnail", "")))
+                  video_processor.add_tags(track_path)
+                  video_processor.add_thumbnail(track_path, str(info.get("thumbnail", "")))
 
                   logging.info(f"Загрузка {filename} завершена")
                   print(f"+ Загрузка {filename} завершена")
