@@ -34,20 +34,19 @@ class DownloadThread(QThread):
             )
 
             # Renames and saves a track
-            video_processor.save_track(
+            filepath = video_processor.save_track(
                info, 
                output_dir
             )
 
             filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
-            track_path = os.path.join(output_dir, filename)
 
             # Fills in tags
-            video_processor.add_tags(track_path)
+            video_processor.add_tags(filepath)
 
             # Writes to the thumbnail track
             video_processor.add_thumbnail(
-               track_path,
+               filepath,
                str(info.get("thumbnail", ""))
             )
             self.log_message.emit(f"+ Загрузка {filename} завершена")

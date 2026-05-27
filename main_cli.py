@@ -103,13 +103,12 @@ def main():
                      outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
                   )
 
-                  video_processor.save_track(info, output_dir)
+                  filepath = video_processor.save_track(info, output_dir)
 
                   filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
-                  track_path = os.path.join(output_dir, filename)
 
-                  video_processor.add_tags(track_path)
-                  video_processor.add_thumbnail(track_path, str(info.get("thumbnail", "")))
+                  video_processor.add_tags(filepath)
+                  video_processor.add_thumbnail(filepath, str(info.get("thumbnail", "")))
 
                   logging.info(f"Загрузка {filename} завершена")
                   print(f"+ Загрузка {filename} завершена")
