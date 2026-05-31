@@ -16,7 +16,7 @@
 ```bash
 python -m venv venv
 source ./venv/bin/activate # Для Linux/Arch
-# venv\Scripts\activate    # Для Windows
+.\venv\bin\Activate.ps1    # Для Windows (PowerShell)
 ```
 
 2. **Установка зависимостей:**
