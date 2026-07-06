@@ -10,7 +10,7 @@ class Config:
 
     def create_config(self):
         default_config = {
-           "output": "~/Downloads/",
+           "output": f"{Path.home()}/Downloads/",
            "yt-dlp-config": {
               "format": "bestaudio/best",
               "noplaylist": True,
