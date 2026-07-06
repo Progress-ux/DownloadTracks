@@ -85,7 +85,7 @@ class VideoDownloader:
         filename = f"{self._safe_artist} - {self._safe_title}{extension}"
         logging.debug(f"Filename: {filename}")
 
-        final_file_path = os.path.join(output_folder, filename)
+        final_file_path = output_folder / filename 
         logging.debug(f"Final path: {final_file_path}")
 
         if os.path.exists(final_file_path):
@@ -113,7 +113,7 @@ class VideoDownloader:
             logging.error(f"Критическая ошибка при сохранении трека: {e}")
             raise Exception(f"Критическая ошибка при сохранении трека: {e}")
       
-    def add_tags(self, track_path: str):
+    def add_tags(self, track_path: Path):
         self.log_callback("+ Начинаю добавление тегов") # type: ignore
         logging.info("Начинаю добавление тегов")
 
@@ -129,7 +129,7 @@ class VideoDownloader:
         self.log_callback("+ Теги успешно добавлены") # type: ignore
         logging.info("Теги успешно добавлены")
       
-    def add_thumbnail(self, track_path: str, thumbnail_url: str):
+    def add_thumbnail(self, track_path: Path, thumbnail_url: str):
         self.log_callback("+ Начинаю добавление обложки") # type: ignore
         logging.info("Начинаю добавление обложки")
 

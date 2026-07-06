@@ -102,17 +102,18 @@ def main():
                 urls = enter_urls()
                 for i, url in enumerate(urls, start=1):
                     try:
-
-                        info = downloader.download_track( url.strip(), 
-                        config.config.get("yt-dlp-config", {}), 
-                        i,
-                        outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
+                        temp_file = output_dir / "temp.%(ext)s"
+                        info = downloader.download_track( 
+                            url.strip(),
+                            config.config.get("yt-dlp-config", {}), 
+                            i,
+                            outtmpl=os.path.join(output_dir, temp_file),
                         )
 
                         downloader.save_track(info, output_dir)
 
                         filename = f"{downloader.get_safe_artist()} - {downloader.get_safe_title()}{downloader.get_extension()}"
-                        track_path = os.path.join(output_dir, filename)
+                        track_path = output_dir / filename
 
                         downloader.add_tags(track_path)
                         downloader.add_thumbnail(track_path, str(info.get("thumbnail", "")))
