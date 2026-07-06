@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
 import re
