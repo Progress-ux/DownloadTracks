@@ -45,7 +45,7 @@ class Config:
         if not self.path_config.exists():
             return self.create_config()
         try:
-            with open(self.path_config, 'r') as f:
+            with open(self.path_config, 'r', encoding='utf-8') as f:
                return json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             return self.create_config()
