@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+
 from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
 import re
@@ -83,7 +85,7 @@ def main():
    config = Config()
    config.config["yt-dlp-config"]["logger"] = NoWarningLogger()
    
-   output_dir = config.config.get("output", "downloads")
+   output_dir = Path(config.config["output"]).expanduser().resolve()
    create_output_folder(output_dir)
 
 
@@ -108,7 +110,7 @@ def main():
                      outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
                   )
 
-                  downloader.save_track(info, output_dir)
+                  downloader.save_track(info, str(output_dir))
 
                   filename = f"{downloader.get_safe_artist()} - {downloader.get_safe_title()}{downloader.get_extension()}"
                   track_path = os.path.join(output_dir, filename)
