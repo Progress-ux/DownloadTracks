@@ -10,29 +10,29 @@ class Config:
 
     def create_config(self):
         default_config = {
-           "output": f"{Path.home()}/Downloads/",
-           "yt-dlp-config": {
-              "format": "bestaudio/best",
-              "noplaylist": True,
-              "outtmpl": "%(title)s.%(ext)s",
-              "quiet": True,
-              "noprogress": True,
-              "extractor_args": {
-                 "youtube": {
-                    "player_client": [
-                       "web",
-                       "android"
-                    ]
-                 }
-              },
-              "postprocessors": [
-                 {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192"
-                 }
-              ]
-           }
+            "output": f"{Path.home()}/Downloads/",
+            "yt-dlp-config": {
+                "format": "bestaudio/best",
+                "noplaylist": True,
+                "outtmpl": "%(title)s.%(ext)s",
+                "quiet": True,
+                "noprogress": True,
+                "extractor_args": {
+                    "youtube": {
+                        "player_client": [
+                            "web",
+                            "android"
+                        ]
+                    }
+                },
+                "postprocessors": [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192"
+                    }
+                ]
+            }
         }
         self.config_dir.mkdir(parents=True, exist_ok=True)
         
@@ -46,14 +46,14 @@ class Config:
             return self.create_config()
         try:
             with open(self.path_config, 'r', encoding='utf-8') as f:
-               return json.load(f)
+                return json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             return self.create_config()
    
     def save_config(self):
-       with open(self.path_config, 'w', encoding='utf-8') as f:
-          json.dump(self.config, f, indent=4, ensure_ascii=False)
+        with open(self.path_config, 'w', encoding='utf-8') as f:
+            json.dump(self.config, f, indent=4, ensure_ascii=False)
    
     @property
     def yt_dlp_data(self):
-       return self.config.get("yt-dlp-config", {})
+        return self.config.get("yt-dlp-config", {})
