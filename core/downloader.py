@@ -1,6 +1,6 @@
+from pathlib import Path
 from typing import Any
 import yt_dlp
-import os
 import logging
 
 
@@ -25,11 +25,10 @@ class VideoDownloader:
         url: str,
         yt_dlp_config: dict[str, Any],
         number: int,
-        outtmpl: str = "temp.%(ext)s",
+        outtmpl: Path = Path("temp.%(ext)s"),
     ):
-
-        if os.path.exists(outtmpl):
-            os.remove(outtmpl)
+        if outtmpl.exists():
+            outtmpl.unlink()
 
         self.log_callback(f"\n+ {number}. Скачиваю: {url}")  # type: ignore
 
@@ -47,4 +46,3 @@ class VideoDownloader:
             raise Exception("Не удалось получить информацию о треке")
 
         return info
-

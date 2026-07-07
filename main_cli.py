@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
 from core.video_processor import VideoProcessor
@@ -43,9 +45,9 @@ def print_yt_dlp_config(config):
     input("\nНажмите Enter, чтобы вернуться в главное меню...")
 
 
-def create_output_folder(output_folder):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+def create_output_folder(output_folder: Path):
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True, exist_ok=True)
 
 
 def draw_progress_bar(progress):
@@ -70,17 +72,22 @@ def main():
     if not args.debug:
         log_mode = logging.INFO
 
+    filename_log = Path.home() / ".local/state/DownloadTrack/download.log"
+    filename_log.parent.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=log_mode,
-        filename="py_log.log",
+        filename=filename_log,
         encoding="utf-8",
         format="%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(message)s",
     )
 
-    config = Config()
+    config_path = Path.home() / ".config/DownloadTracks/config.json"
+    print(config_path)
+    config = Config(path_config=config_path)
     config.config["yt-dlp-config"]["logger"] = NoWarningLogger(logging.error)
 
-    output_dir = config.config.get("output", "downloads")
+    output_dir = Path(config.config["output"])
     create_output_folder(output_dir)
 
     downloader = VideoDownloader(
@@ -102,10 +109,10 @@ def main():
                             url.strip(),
                             config.config.get("yt-dlp-config", {}),
                             i,
-                            outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
+                            outtmpl=output_dir / "temp.%(ext)s",
                         )
 
-                        filepath = video_processor.save_track(info, output_dir)
+                        filepath: Path = video_processor.save_track(info, output_dir)
 
                         filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
 

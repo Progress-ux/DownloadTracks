@@ -1,3 +1,4 @@
+from pathlib import Path
 import re
 import os
 import requests
@@ -24,17 +25,18 @@ class VideoProcessor:
     def get_extension(self) -> str:
         return self._extension
 
-    def _get_filepath(self, info) -> str:
+    def _get_filepath(self, info) -> Path:
         actual_temp_path = ""
 
         if "requested_downloads" in info and info["requested_downloads"]:
-            actual_temp_path = info["requested_downloads"][0].get("filepath")
+            actual_temp_path_str = info["requested_downloads"][0].get("filepath")
         else:
             # Фолбэк, если по какой-то причине списка нет (хотя он должен быть)
             logging.warning("В requested_downloads не найден filepath")
-            actual_temp_path = info.get("_filename")
+            actual_temp_path_str = info.get("_filename")
 
-        if not actual_temp_path or not os.path.exists(actual_temp_path):
+        actual_temp_path = Path(actual_temp_path_str) if actual_temp_path_str else None
+        if not actual_temp_path or not actual_temp_path.exists():
             logging.error(f"Скачанный файл не найден по пути: {actual_temp_path}")
             raise FileNotFoundError(
                 f"Скачанный файл не найден по пути: {actual_temp_path}"
@@ -42,7 +44,7 @@ class VideoProcessor:
 
         return actual_temp_path
 
-    def save_track(self, info, output_folder: str) -> str:
+    def save_track(self, info, output_folder: Path) -> Path:
 
         self.log_callback("+ Начинаю извлечение аудио")  # type: ignore
         logging.info("Начинаю извлечение аудио")
@@ -50,9 +52,9 @@ class VideoProcessor:
         artist = info.get("uploader", "Unknown")
         title = info.get("title", "Unknown")
 
-        actual_temp_path = self._get_filepath(info)
+        actual_temp_path: Path = self._get_filepath(info)
 
-        extension = os.path.splitext(actual_temp_path)[1]
+        extension = actual_temp_path.suffix
         self._extension = extension
 
         self._safe_artist = re.sub(r'[<>:"/\\|?*]', "", str(artist))
@@ -61,23 +63,23 @@ class VideoProcessor:
         filename = f"{self._safe_artist} - {self._safe_title}{extension}"
         logging.debug(f"Filename: {filename}")
 
-        final_file_path = os.path.join(output_folder, filename)
+        final_file_path: Path = output_folder / filename
         logging.debug(f"Final path: {final_file_path}")
 
-        if os.path.exists(final_file_path):
-            if os.path.exists(actual_temp_path):
-                os.remove(actual_temp_path)
+        if final_file_path.exists():
+            if actual_temp_path.exists():
+                actual_temp_path.unlink()
             logging.warning(f"Файл {filename} уже существует")
             raise FileExistsError(f"Файл {filename} уже существует")
 
         try:
-            if os.path.exists(actual_temp_path):
-                os.replace(actual_temp_path, final_file_path)
+            if actual_temp_path.exists():
+                actual_temp_path.replace(final_file_path)
 
                 self.log_callback(f"+ Аудио сохранено как: {filename}")  # type: ignore
                 logging.info(f"Аудио сохранено как: {filename}")
 
-                file_size = os.path.getsize(final_file_path)
+                file_size = final_file_path.stat().st_size
                 logging.info(f"Файл скачан успешно. Размер: {file_size} байт")
             else:
                 logging.error(f"Временный файл {actual_temp_path} не найден")
@@ -91,7 +93,7 @@ class VideoProcessor:
 
         return final_file_path
 
-    def add_tags(self, track_path: str):
+    def add_tags(self, track_path: Path):
 
         self.log_callback("+ Начинаю добавление тегов")  # type: ignore
         logging.info("Начинаю добавление тегов")
@@ -108,7 +110,7 @@ class VideoProcessor:
         self.log_callback("+ Теги успешно добавлены")  # type: ignore
         logging.info("Теги успешно добавлены")
 
-    def add_thumbnail(self, track_path: str, thumbnail_url: str):
+    def add_thumbnail(self, track_path: Path, thumbnail_url: str):
         self.log_callback("+ Начинаю добавление обложки")  # type: ignore
         logging.info("Начинаю добавление обложки")
 
@@ -152,4 +154,3 @@ class VideoProcessor:
         except Exception as e:
             logging.error(f"Не удалось добавить обложку в ID3 теги: {e}")
             raise Exception(f"Не удалось добавить обложку в ID3 теги: {e}")
-
