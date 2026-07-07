@@ -75,9 +75,12 @@ def main():
     if not args.debug:
         log_mode = logging.INFO
 
+    filename_logs = Path("~/.local/state/VideoDownloader/video-downloader.log").expanduser().resolve()
+    filename_logs.parent.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=log_mode, 
-        filename="py_log.log", 
+        filename=filename_logs, 
         encoding="utf-8",
         format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(message)s'
     )
@@ -87,7 +90,6 @@ def main():
 
     output_dir = Path(config.config["output"]).expanduser().resolve()
     create_output_folder(output_dir)
-
 
     downloader = VideoDownloader(
         log_callback=print,
