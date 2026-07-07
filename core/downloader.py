@@ -66,17 +66,19 @@ class VideoDownloader:
         title = info.get("title", "Unknown")
 
         if 'requested_downloads' in info and info['requested_downloads']:
-            actual_temp_path = info['requested_downloads'][0].get('filepath')
+            filepath_str = info['requested_downloads'][0].get('filepath')
+            actual_temp_path = Path(filepath_str) if filepath_str else None
         else:
             # Фолбэк, если по какой-то причине списка нет
             logging.warning("В requested_downloads не найден filepath")
-            actual_temp_path = info.get('_filename')
+            filepath_str = info.get('_filename')
+            actual_temp_path = Path(filepath_str) if filepath_str else None
 
-        if not actual_temp_path or not os.path.exists(actual_temp_path):
+        if not actual_temp_path or not actual_temp_path.exists():
             logging.error(f"Скачанный файл не найден по пути: {actual_temp_path}")
             raise FileNotFoundError(f"Скачанный файл не найден по пути: {actual_temp_path}")
 
-        extension = os.path.splitext(actual_temp_path)[1]
+        extension = actual_temp_path.suffix 
         self._extension = extension
 
         self._safe_artist = re.sub(r'[<>:"/\\|?*]', "", str(artist))
@@ -88,20 +90,20 @@ class VideoDownloader:
         final_file_path = output_folder / filename 
         logging.debug(f"Final path: {final_file_path}")
 
-        if os.path.exists(final_file_path):
-            if os.path.exists(actual_temp_path):
-                os.remove(actual_temp_path)
+        if final_file_path.exists():
+            if actual_temp_path.exists():
+               actual_temp_path.unlink() 
             logging.warning(f"Файл {filename} уже существует")
             raise FileExistsError(f"Файл {filename} уже существует")
 
         try:
-            if os.path.exists(actual_temp_path):
-                os.replace(actual_temp_path, final_file_path)
+            if actual_temp_path.exists():
+                actual_temp_path.replace(final_file_path)
 
                 self.log_callback(f"+ Аудио сохранено как: {filename}") # type: ignore
                 logging.info(f"Аудио сохранено как: {filename}")
 
-                file_size = os.path.getsize(final_file_path)
+                file_size = final_file_path.stat().st_size
                 logging.info(f"Файл скачан успешно. Размер: {file_size} байт")
             else: 
                 logging.error(f"Временный файл {actual_temp_path} не найден")
