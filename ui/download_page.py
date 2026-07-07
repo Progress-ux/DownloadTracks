@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QProgressBar, QTextEdit, QVBoxLayout, QPushButton, QWidget
 from ui.worker import DownloadThread
-from infrastructure.config_manager import Config
 import os
+
 
 class DownloadWindow(QWidget):
     def __init__(self, config):
@@ -9,7 +9,9 @@ class DownloadWindow(QWidget):
 
         # UI Elements
         self.url_input = QTextEdit()
-        self.url_input.setPlaceholderText("Вставьте ссылки на YouTube (через пробел, запятую или построчно).")
+        self.url_input.setPlaceholderText(
+            "Вставьте ссылки на YouTube (через пробел, запятую или построчно)."
+        )
 
         self.btn_download = QPushButton("Скачать все")
 
@@ -41,15 +43,19 @@ class DownloadWindow(QWidget):
         if not urls:
             return
 
-        url_list = [url.strip() for url in urls.replace(",", " ").split() if url.strip()]
+        url_list = [
+            url.strip() for url in urls.replace(",", " ").split() if url.strip()
+        ]
         unique_list = list(dict.fromkeys(url_list))
         self.download_thread = DownloadThread(unique_list, self.config)
 
         self.download_thread.progress.connect(self.update_progress)
+
         self.download_thread.finished.connect(self.download_finished)
+
         self.download_thread.log_message.connect(self.log_message.append)
-        
         self.log_message.ensureCursorVisible()
+
         self.download_thread.start()
 
     def update_progress(self, value):
@@ -57,3 +63,4 @@ class DownloadWindow(QWidget):
 
     def download_finished(self):
         self.progress_bar.setValue(100)
+

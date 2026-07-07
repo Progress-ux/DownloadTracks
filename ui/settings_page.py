@@ -1,7 +1,18 @@
-from PySide6.QtWidgets import (QFileDialog, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, 
-                               QLineEdit, QPushButton, QLabel, QFormLayout, QGroupBox)
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QComboBox,
+    QLineEdit,
+    QPushButton,
+    QLabel,
+    QFormLayout,
+    QGroupBox,
+)
 from PySide6.QtCore import Qt
 import os
+
 
 class SettingsWindow(QWidget):
     def __init__(self, config):
@@ -21,7 +32,9 @@ class SettingsWindow(QWidget):
         audio_layout.setSpacing(10)
 
         self.choice_preferred_codec = QComboBox()
-        self.choice_preferred_codec.addItems(["mp3", "aac", "opus", "m4a", "wav", "flac"])
+        self.choice_preferred_codec.addItems(
+            ["mp3", "aac", "opus", "m4a", "wav", "flac"]
+        )
         self.choice_preferred_codec.setFixedWidth(120)
 
         self.choice_preferred_quality = QComboBox()
@@ -70,9 +83,7 @@ class SettingsWindow(QWidget):
 
     def browse_folder(self):
         directory = QFileDialog.getExistingDirectory(
-            self, 
-            "Выберите папку для сохранения",
-            self.save_path.text() or os.getcwd()
+            self, "Выберите папку для сохранения", self.save_path.text() or os.getcwd()
         )
         if directory:
             self.save_path.setText(directory)
@@ -84,7 +95,7 @@ class SettingsWindow(QWidget):
 
         if new_path:
             self.config.config["output"] = new_path
-        
+
         pps = self.config.config["yt-dlp-config"].get("postprocessors", [])
         for pp in pps:
             if pp.get("key") == "FFmpegExtractAudio":
@@ -92,7 +103,7 @@ class SettingsWindow(QWidget):
                 pp["preferredquality"] = new_quality
 
         self.config.save_config()
-     
+
     def load_settings_to_ui(self):
         current_path = self.config.config.get("output", "downloads")
         self.save_path.setText(current_path)
@@ -108,6 +119,7 @@ class SettingsWindow(QWidget):
             if pp.get("key") == "FFmpegExtractAudio":
                 codec = pp.get("preferredcodec", "mp3")
                 quality = pp.get("preferredquality", "192")
-                
+
         self.choice_preferred_codec.setCurrentText(codec)
         self.choice_preferred_quality.setCurrentText(quality)
+

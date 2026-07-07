@@ -3,6 +3,7 @@ from ui.download_page import DownloadWindow
 from ui.settings_page import SettingsWindow
 from infrastructure.config_manager import Config
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

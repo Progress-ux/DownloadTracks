@@ -1,22 +1,14 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
 
 from infrastructure.config_manager import Config
 from core.downloader import VideoDownloader
+from core.video_processor import VideoProcessor
+from core.yt_dlp_logger import NoWarningLogger
 import re
 import os
 import logging
 import argparse
 
-class NoWarningLogger:
-    def debug(self, msg):
-        pass
-    def warning(self, msg):
-        pass
-    def error(self, msg):
-        logging.error(msg)
-        print(msg)
 
 def main_menu():
     print("\n=== YouTube Music Downloader (CLI) ===")
@@ -24,6 +16,7 @@ def main_menu():
     print("2. Настройки (посмотреть текущие)")
     print("0. Выход")
     return input("\nВыберите действие: ")
+
 
 def enter_urls():
     print("Вставь ссылки на YouTube (через пробел, запятую или построчно).")
@@ -33,7 +26,7 @@ def enter_urls():
     while True:
         line = input()
         if not line.strip():
-             break
+            break
         urls.extend(re.split(r"[ ,]+", line.strip()))
 
     if not urls:
@@ -44,24 +37,28 @@ def enter_urls():
 
     return unique_list
 
+
 def print_yt_dlp_config(config):
     print("\nТекущие настройки yt-dlp:")
     for key, value in config.config.get("yt-dlp-config", {}).items():
         print(f"  {key}: {value}")
     input("\nНажмите Enter, чтобы вернуться в главное меню...")
 
-def create_output_folder(output_folder):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+
+def create_output_folder(output_folder: Path):
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True, exist_ok=True)
+
 
 def draw_progress_bar(progress):
     bar_length = 50
     filled_length = int(bar_length * progress // 100)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+    bar = "█" * filled_length + "-" * (bar_length - filled_length)
     print(f"\rЗагрузка: |{bar}| {progress}%", end="\r", flush=True)
 
     if progress >= 100:
         print()  # Move to a new line after loading is complete
+
 
 def main():
 
@@ -75,26 +72,29 @@ def main():
     if not args.debug:
         log_mode = logging.INFO
 
-    filename_logs = Path("~/.local/state/VideoDownloader/video-downloader.log").expanduser().resolve()
-    filename_logs.parent.mkdir(parents=True, exist_ok=True)
+    filename_log = Path.home() / ".local/state/DownloadTrack/download.log"
+    filename_log.parent.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
-        level=log_mode, 
-        filename=filename_logs, 
+        level=log_mode,
+        filename=filename_log,
         encoding="utf-8",
-        format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(message)s'
+        format="%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(message)s",
     )
 
-    config = Config()
-    config.config["yt-dlp-config"]["logger"] = NoWarningLogger()
+    config_path = Path.home() / ".config/DownloadTracks/config.json"
+    print(config_path)
+    config = Config(path_config=config_path)
+    config.config["yt-dlp-config"]["logger"] = NoWarningLogger(logging.error)
 
-    output_dir = Path(config.config["output"]).expanduser().resolve()
+    output_dir = Path(config.config["output"])
     create_output_folder(output_dir)
 
     downloader = VideoDownloader(
-        log_callback=print,
-        progress_callback=draw_progress_bar
+        log_callback=print, progress_callback=draw_progress_bar
     )
+
+    video_processor = VideoProcessor(log_callback=print)
 
     try:
         while True:
@@ -104,21 +104,22 @@ def main():
                 urls = enter_urls()
                 for i, url in enumerate(urls, start=1):
                     try:
-                        temp_file = output_dir / "temp.%(ext)s"
-                        info = downloader.download_track( 
+
+                        info = downloader.download_track(
                             url.strip(),
-                            config.config.get("yt-dlp-config", {}), 
+                            config.config.get("yt-dlp-config", {}),
                             i,
-                            outtmpl=os.path.join(output_dir, temp_file),
+                            outtmpl=output_dir / "temp.%(ext)s",
                         )
 
-                        downloader.save_track(info, output_dir)
+                        filepath: Path = video_processor.save_track(info, output_dir)
 
-                        filename = f"{downloader.get_safe_artist()} - {downloader.get_safe_title()}{downloader.get_extension()}"
-                        track_path = output_dir / filename
+                        filename = f"{video_processor.get_safe_artist()} - {video_processor.get_safe_title()}{video_processor.get_extension()}"
 
-                        downloader.add_tags(track_path)
-                        downloader.add_thumbnail(track_path, str(info.get("thumbnail", "")))
+                        video_processor.add_tags(filepath)
+                        video_processor.add_thumbnail(
+                            filepath, str(info.get("thumbnail", ""))
+                        )
 
                         logging.info(f"Загрузка {filename} завершена")
                         print(f"+ Загрузка {filename} завершена")
@@ -134,7 +135,7 @@ def main():
 
             elif choice == "2":
                 print("\nТекущие настройки:")
-                print(f"Выходная папка: {output_dir}")
+                print(f"Выходная папка: {config.config.get('output', 'downloads')}")
                 print_yt_dlp_config(config)
 
             elif choice == "0":
@@ -145,8 +146,6 @@ def main():
                 print("Неверный выбор. Пожалуйста, попробуйте снова.")
     except KeyboardInterrupt:
         print("\nПрограмма прервана пользователем.")
-
-
 
 
 main()
