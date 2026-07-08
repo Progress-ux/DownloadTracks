@@ -5,7 +5,6 @@ from core.downloader import VideoDownloader
 from core.video_processor import VideoProcessor
 from core.yt_dlp_logger import NoWarningLogger
 import re
-import os
 import logging
 import argparse
 
