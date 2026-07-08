@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from core.downloader import VideoDownloader
 from core.video_processor import VideoProcessor
 from core.yt_dlp_logger import NoWarningLogger
@@ -24,14 +25,15 @@ class DownloadThread(QThread):
 
         for i, url in enumerate(self.urls, start=1):
             try:
-                output_dir = self.config.config.get("output", "downloads")
+                output_dir_str = self.config.config.get("output", "downloads")
+                output_dir = Path(output_dir_str)
 
                 # Downloads the track to temp.{ext}
                 info = video_downloader.download_track(
                     url.strip(),
                     self.config.config.get("yt-dlp-config", {}),
                     i,
-                    outtmpl=os.path.join(output_dir, "temp.%(ext)s"),
+                    outtmpl=output_dir / "temp.%(ext)s",
                 )
 
                 # Renames and saves a track
@@ -54,4 +56,3 @@ class DownloadThread(QThread):
                 self.log_message.emit(f"- Ошибка при загрузке {url}: {e}")
                 continue
         self.log_message.emit("+ Загрузка завершена")
-
