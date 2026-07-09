@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 from ui.download_page import DownloadWindow
 from ui.settings_page import SettingsWindow
@@ -10,7 +12,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("YouTube MP3 Downloader")
         self.setGeometry(100, 100, 800, 600)
 
-        self.config = Config()
+        config_path = Path(Path.home() / ".config/VideoDownload/config.json")
+        self.config = Config(config_path)
 
         self.download_window = DownloadWindow(config=self.config)
         self.settings_window = SettingsWindow(config=self.config)
