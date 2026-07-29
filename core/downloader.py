@@ -27,15 +27,12 @@ class VideoDownloader:
         number: int,
         outtmpl: Path = Path("temp.%(ext)s"),
     ):
-        if outtmpl.exists():
-            outtmpl.unlink()
-
         self.log_callback(f"\n+ {number}. Скачиваю: {url}")  # type: ignore
 
         local_yt_dlp: dict[str, Any] = yt_dlp_config.copy()
         logging.debug(f"Используемый конфиг yt_dlp: {local_yt_dlp}")
 
-        local_yt_dlp["outtmpl"] = outtmpl
+        local_yt_dlp["outtmpl"] = str(outtmpl)
         local_yt_dlp["progress_hooks"] = [self.progress_hook]
 
         with yt_dlp.YoutubeDL(local_yt_dlp) as ydl:  # type: ignore
