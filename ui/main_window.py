@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("YouTube MP3 Downloader")
         self.setGeometry(100, 100, 800, 600)
 
-        config_path = Path(Path.home() / ".config/VideoDownload/config.json")
+        config_path = Path(Path.home() / ".config/DownloadTracks/config.json")
         self.config = Config(config_path)
 
         self.download_window = DownloadWindow(config=self.config)
